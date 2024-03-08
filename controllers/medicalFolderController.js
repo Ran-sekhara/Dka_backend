@@ -33,5 +33,23 @@ exports.createMedicalFolder = async (req, res) => {
         res.status(500).json({ status: false, message: 'already excited' });
     }
 };
+exports.getMedicalFolderByPatientId = async (req, res) => {
+    try {
+        const { patientId } = req.params;
 
+        // Find the MedicalFolder by patient ID
+        const medicalFolder = await MedicalFolder.findOne({
+            where: { id_patient: patientId },
+        });
+
+        if (!medicalFolder) {
+            return res.status(404).json({ status: false, message: 'MedicalFolder not found for the specified patient' });
+        }
+
+        res.json({ status: true, message: 'MedicalFolder information found', information : medicalFolder });
+    } catch (error) {
+        console.error('Error getting MedicalFolder information:', error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};
 
