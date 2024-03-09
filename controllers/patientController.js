@@ -5,7 +5,7 @@ const PatientServices = require('../services/patient.service');
 // Create a Patient
 exports.createPatient = async (req, res) => {
     try {
-        const { first_name, last_name, email, phone, password, role , address , age , gender , height , weight } = req.body;
+        const { first_name, last_name, email, phone, password, role } = req.body;
         
         // Check if Patient with the same email already exists
         const existingPatient = await Patient.findOne({ where: { email } });
@@ -18,7 +18,7 @@ exports.createPatient = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new Patient with hashed password
-        const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword, role , address , age , gender , height , weight  });
+        const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword, role  });
         res.json({ status: true, message: 'Patient registered successfully', id: patient.id_patient });
     } catch (error) {
         console.error('Error creating patient:', error);

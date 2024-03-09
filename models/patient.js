@@ -33,26 +33,7 @@ const Patient = sequelize.define('patient', {
         type: DataTypes.STRING,
         allowNull: false
     },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    age: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    gender: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    height: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    weight: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
+    
 }, {
     timestamps: false // Disable timestamps
 });
