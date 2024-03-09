@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const apiRoutes = require('./routes/api');
 const sequelize = require('./config/database');
+
 require('dotenv').config({ path: '.env.local' });
 
 

@@ -21,7 +21,7 @@ router.post('/patient/loginPatient', patientController.loginPatient);
 
 //medicalfolder
 router.post('/medicalfolder/:patientId', medicalFolderController.createMedicalFolder);
-
+router.get('/medicalfolder/patient/:patientId', medicalFolderController.getMedicalFolderByPatientId);
 
 
 module.exports = router;
