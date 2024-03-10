@@ -51,7 +51,7 @@ exports.loginAdmin = async (req, res, next) => {
                     const token = await AdminServices.generateAccessToken(tokenData, expiresIn)
 
     
-        res.status(200).json({ status: true, message: 'Successfully logged in',token: token , profile: admin});
+        res.status(200).json({ status: true, message: 'Successfully logged in',token: token });
     } catch (error) {
         console.error('Error logging in admin:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });

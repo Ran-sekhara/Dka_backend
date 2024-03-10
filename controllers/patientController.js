@@ -50,9 +50,26 @@ exports.loginPatient = async (req, res, next) => {
         tokenData = {id: patient.id_patient , email: patient.email, role: "patient" };
                     const token = await PatientServices.generateAccessToken(tokenData, expiresIn)
 
-        res.status(200).json({ status: true, message: 'Successfully logged in',token:token , profile: patient});
+        res.status(200).json({ status: true, message: 'Successfully logged in',token:token });
     } catch (error) {
         console.error('Error logging in patient:', error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};
+
+exports.getPatientProfile = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        // Retrieve Patient by email
+        const patient = await Patient.findOne({ where: { id_patient: patientId} });
+        if (!patient) {
+            return res.status(404).json({ status: false, message: 'Patient does not exist' });
+        }
+
+        // Return the patient details
+        res.json({ first_name : patient.first_name, last_name: patient.last_name, email: patient.email , phone:patient.phone });
+    } catch (error) {
+        console.error('Error getting patient profile:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };

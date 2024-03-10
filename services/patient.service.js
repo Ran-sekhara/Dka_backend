@@ -26,6 +26,14 @@ class PatientServices {
             throw error;
         }
     }
+    static async getPatientById(id) {
+        try {
+            const patient = await Patient.findByPk(id);
+            return patient;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     static async checkPatient(email) {
         try {

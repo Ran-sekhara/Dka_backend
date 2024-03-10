@@ -50,7 +50,7 @@ exports.loginDoctor = async (req, res, next) => {
         tokenData = {id: doctor.id_doctor , email: doctor.email, role: "doctor" };
                     const token = await DoctorServices.generateAccessToken(tokenData, expiresIn)
 
-        res.status(200).json({ status: true, message: 'Successfully logged in',token: token, profile: doctor });
+        res.status(200).json({ status: true, message: 'Successfully logged in',token: token });
     } catch (error) {
         console.error('Error logging in doctor:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
