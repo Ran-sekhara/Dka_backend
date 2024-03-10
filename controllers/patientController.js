@@ -5,7 +5,7 @@ const PatientServices = require('../services/patient.service');
 // Create a Patient
 exports.createPatient = async (req, res) => {
     try {
-        const { first_name, last_name, email, phone, password, role , address , age , gender , height , weight } = req.body;
+        const { first_name, last_name, email, phone, password, role } = req.body;
         
         // Check if Patient with the same email already exists
         const existingPatient = await Patient.findOne({ where: { email } });
@@ -18,7 +18,7 @@ exports.createPatient = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new Patient with hashed password
-        const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword, role , address , age , gender , height , weight  });
+        const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword, role  });
         res.json({ status: true, message: 'Patient registered successfully', id: patient.id_patient });
     } catch (error) {
         console.error('Error creating patient:', error);
@@ -50,9 +50,26 @@ exports.loginPatient = async (req, res, next) => {
         tokenData = {id: patient.id_patient , email: patient.email, role: "patient" };
                     const token = await PatientServices.generateAccessToken(tokenData, expiresIn)
 
-        res.status(200).json({ status: true, message: 'Successfully logged in',token:token , profile: patient});
+        res.status(200).json({ status: true, message: 'Successfully logged in',token:token });
     } catch (error) {
         console.error('Error logging in patient:', error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};
+
+exports.getPatientProfile = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        // Retrieve Patient by email
+        const patient = await Patient.findOne({ where: { id_patient: patientId} });
+        if (!patient) {
+            return res.status(404).json({ status: false, message: 'Patient does not exist' });
+        }
+
+        // Return the patient details
+        res.json({ first_name : patient.first_name, last_name: patient.last_name, email: patient.email , phone:patient.phone });
+    } catch (error) {
+        console.error('Error getting patient profile:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };

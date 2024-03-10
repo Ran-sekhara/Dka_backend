@@ -20,6 +20,26 @@ const MedicalFolder = sequelize.define('medicalfolder', {
         allowNull: false,
         unique: true
     },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    age: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    gender: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    height: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    weight: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     id_patient: {
         type: DataTypes.INTEGER,
         allowNull: false

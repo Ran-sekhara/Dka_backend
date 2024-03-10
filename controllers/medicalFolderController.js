@@ -14,13 +14,18 @@ exports.createMedicalFolder = async (req, res) => {
         }
 
         // Extract fields from the request body
-        const { diabetes_type, diabetes_history, dka_history } = req.body;
+        const { diabetes_type, diabetes_history, dka_history, address, age, gender,height,weight} = req.body;
 
         // Create MedicalFolder
         const medicalFolder = await MedicalFolder.create({
             diabetes_type,
             diabetes_history,
             dka_history,
+            address,
+            age,
+            gender,
+            height,
+            weight,
             id_patient: patientId,
         });
 
