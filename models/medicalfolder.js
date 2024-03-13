@@ -9,21 +9,18 @@ const MedicalFolder = sequelize.define('medicalfolder', {
     },
     diabetes_type: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     diabetes_history: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     dka_history: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true
     },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
+   
     age: {
         type: DataTypes.INTEGER,
         allowNull: true

@@ -29,11 +29,19 @@ const Patient = sequelize.define('patient', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     role: {
         type: DataTypes.STRING,
         allowNull: false
     },
-    
+    id_doctor: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+ 
 }, {
     timestamps: false // Disable timestamps
 });

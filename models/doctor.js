@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-
+const Patient = require('./patient');
 const Doctor = sequelize.define('doctor', {
     id_doctor: {
         type: DataTypes.INTEGER,
@@ -40,7 +40,13 @@ const Doctor = sequelize.define('doctor', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    image: {
+        type: DataTypes.STRING, 
+        allowNull: true 
+    },
 }, {
     timestamps: false // Disable timestamps
 });
+Doctor.hasMany(Patient, { foreignKey: 'id_doctor' });
+
 module.exports = Doctor;
