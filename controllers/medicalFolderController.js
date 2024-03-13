@@ -51,10 +51,18 @@ exports.getMedicalFolderByPatientId = async (req, res) => {
             return res.status(404).json({ status: false, message: 'MedicalFolder not found for the specified patient' });
         }
 
-        res.json({ status: true, message: 'MedicalFolder information found', information : medicalFolder });
+        res.json({ status: true, message: 'MedicalFolder information found', information: medicalFolder });
     } catch (error) {
         console.error('Error getting MedicalFolder information:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
+
+
+
+
+
+
+
+
 

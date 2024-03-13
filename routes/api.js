@@ -6,6 +6,7 @@ const graphController = require('../controllers/graphController')
 const medicalFolderController = require('../controllers/medicalFolderController')
 const authMiddleware = require('../middleware/auth');
 
+
 const router = express.Router();
 
 
@@ -16,11 +17,17 @@ router.post('/admin/loginAdmin', adminController.loginAdmin);
 //doctor
 router.post('/doctor', doctorController.createDoctor);
 router.post('/doctor/loginDoctor', doctorController.loginDoctor);
+router.post('/doctor/recoverpsswrd', doctorController.recoverPassword);
+router.post('/doctor/checkEmailExistence', doctorController.checkEmailExistence);
+router.get('/doctors', doctorController.getAllDoctors);
+
+
 
 //patient
 router.post('/patient', patientController.createPatient);
 router.post('/patient/loginPatient', patientController.loginPatient);
 router.get('/patient/profile/:patientId', patientController.getPatientProfile);
+router.post('/patient/recoverpsswrd', patientController.recoverPassword);
 
 //medicalfolder
 router.post('/medicalfolder/:patientId', medicalFolderController.createMedicalFolder);
@@ -29,6 +36,9 @@ router.get('/medicalfolder/patient/:patientId', medicalFolderController.getMedic
 //graph
 router.post('/graph/test', graphController.createTest);
 router.get('/graph/good', graphController.getGraphData);
+router.get('/graph/good', graphController.getGraphData);
+router.get('/graph/danger', graphController.Danger);
+router.get('/graph/nrml', graphController.Nrml);
 
 
 module.exports = router;
