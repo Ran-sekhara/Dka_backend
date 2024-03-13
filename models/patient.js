@@ -29,6 +29,10 @@ const Patient = sequelize.define('patient', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    address: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     role: {
         type: DataTypes.STRING,
         allowNull: false

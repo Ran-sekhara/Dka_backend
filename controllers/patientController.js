@@ -7,7 +7,7 @@ const nodemailer = require('nodemailer');
 // Create a Patient
 exports.createPatient = async (req, res) => {
     try {
-        const { first_name, last_name, email, phone, password, id_doctor,role } = req.body;
+        const { first_name, last_name, email, phone, password,address, id_doctor,role } = req.body;
         
         // Check if the password meets the minimum length requirement
         if (password.length < 7) {
@@ -25,7 +25,7 @@ exports.createPatient = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new Patient with hashed password
-        const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword,id_doctor, role  });
+        const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword,address,id_doctor, role  });
         res.json({ status: true, message: 'Patient registered successfully', id: patient.id_patient });
     } catch (error) {
         console.error('Error creating patient:', error);
@@ -78,7 +78,8 @@ exports.getPatientProfile = async (req, res) => {
              last_name: patient.last_name, 
              email: patient.email ,
              password:patient.password, 
-             phone:patient.phone
+             phone:patient.phone,
+             address:patient.address
 
              });
     } catch (error) {
