@@ -20,6 +20,14 @@ router.post('/doctor/loginDoctor', doctorController.loginDoctor);
 router.post('/doctor/recoverpsswrd', doctorController.recoverPassword);
 router.post('/doctor/checkEmailExistence', doctorController.checkEmailExistence);
 router.get('/doctors', doctorController.getAllDoctors);
+router.get('/doctors/:doctorId/patients', doctorController.getDoctorPatientsInfo);
+router.get('/doctorsName', doctorController.getAllDoctorsByName);
+// // Route for uploading doctor image
+// router.post('/:id/upload-image', doctorController.uploadImage);
+
+// // Route for retrieving doctor image
+// router.get('/:id/image', doctorController.getImage);
+
 
 
 
@@ -28,6 +36,8 @@ router.post('/patient', patientController.createPatient);
 router.post('/patient/loginPatient', patientController.loginPatient);
 router.get('/patient/profile/:patientId', patientController.getPatientProfile);
 router.post('/patient/recoverpsswrd', patientController.recoverPassword);
+router.put('/patients/:patientId/doctor/:doctorId', patientController.updatePatientDoctor); 
+router.get('/patient/details/:patientId', patientController.getPatientDetails);
 
 //medicalfolder
 router.post('/medicalfolder/:patientId', medicalFolderController.createMedicalFolder);

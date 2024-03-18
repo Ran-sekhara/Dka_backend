@@ -57,3 +57,21 @@ exports.loginAdmin = async (req, res, next) => {
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
+exports.approveDoctor = async (req, res) => {
+    try {
+        const { doctorId } = req.params;
+        // Find the doctor by id
+        const doctor = await Doctor.findByPk(doctorId);
+        if (!doctor) {return res.status(404).json({ status: false, message: 'Doctor not found' });}
+// Set is_approved to true
+        doctor.is_approved = true;
+        // Generate temporary password and save it
+        const Password = AdminServices.generateTemporaryPassword();
+        doctor.password = Password;
+        await doctor.save();
+        res.json({ status: true, message: 'Doctor approved successfully' });
+    } catch (error) {
+        console.error('Error approving doctor:', error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};

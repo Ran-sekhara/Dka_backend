@@ -7,6 +7,8 @@ const nodemailer = require('nodemailer');
 // Create a Patient
 exports.createPatient = async (req, res) => {
     try {
+        console.log('Received request to create a new patient:', req.body);
+
         const { first_name, last_name, email, phone, password,address, id_doctor,role } = req.body;
         
         // Check if the password meets the minimum length requirement
@@ -26,6 +28,7 @@ exports.createPatient = async (req, res) => {
 
         // Create new Patient with hashed password
         const patient = await Patient.create({ first_name, last_name, email, phone, password: hashedPassword,address,id_doctor, role  });
+        console.log('Patient created successfully:', patient);
         res.json({ status: true, message: 'Patient registered successfully', id: patient.id_patient });
     } catch (error) {
         console.error('Error creating patient:', error);
@@ -47,7 +50,7 @@ exports.loginPatient = async (req, res, next) => {
         // Compare passwords
         const isPasswordCorrect = await bcrypt.compare(password, patient.password);
         if (!isPasswordCorrect) {
-            return res.status(401).json({ status: false, message: 'Incorrect patient name or password' });
+            return res.status(401).json({ status: false, message: 'Incorrect password' });
         }
 
         const oneDayInSeconds = 24 * 60 * 60; // 1 day = 24 hours * 60 minutes * 60 seconds
@@ -137,6 +140,52 @@ exports.recoverPassword = async (req, res) => {
         });
     } catch (error) {
         console.error('Error during password recovery:', error);
+        res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};
+exports.updatePatientDoctor = async (req, res) => {
+    try {
+      const { patientId, doctorId } = req.params;
+  
+      // Find the patient by ID
+      const patient = await Patient.findByPk(patientId);
+  
+      if (!patient) {
+        return res.status(404).json({ message: 'Patient not found' });
+      }
+  
+      // Update the patient's doctor
+      patient.id_doctor = doctorId;
+      await patient.save();
+  
+      return res.status(200).json({ message: 'Patient doctor updated successfully' });
+    } catch (error) {
+      console.error('Error updating patient doctor:', error);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+  
+  exports.getPatientDetails = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const patient = await Patient.findOne({ where: { id_patient: patientId} });
+
+        if (!patient) {
+            return res.status(404).json({ status: false, message: 'Patient not found' });
+        }
+
+        // Return the patient details
+        res.status(200).json({
+            id_patient: patient.id_patient,
+            first_name: patient.first_name,
+            last_name: patient.last_name,
+            email: patient.email,
+            phone: patient.phone,
+            address: patient.address
+            // Add other fields as needed
+        });
+    } catch (error) {
+        console.error('Error fetching patient details:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
