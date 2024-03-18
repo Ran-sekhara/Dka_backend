@@ -139,3 +139,16 @@ exports.loginDoctor = async (req, res, next) => {
       res.status(500).json({ status: false, message: 'Internal server error' });
     }
   };
+
+  exports.getAllDoctorsByName = async (req, res) => {
+    try {
+      const doctors = await Doctor.findAll({
+        attributes: ['id_doctor', 'first_name', 'last_name'],
+      });
+  
+      res.status(200).json({ status: true, doctors });
+    } catch (error) {
+      console.error('Error fetching doctors:', error);
+      res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};

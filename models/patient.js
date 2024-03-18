@@ -39,7 +39,7 @@ const Patient = sequelize.define('patient', {
     },
     id_doctor: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: true
     },
  
 }, {

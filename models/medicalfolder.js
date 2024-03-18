@@ -21,8 +21,8 @@ const MedicalFolder = sequelize.define('medicalfolder', {
         unique: true
     },
    
-    age: {
-        type: DataTypes.INTEGER,
+    date_of_birth: {
+        type: DataTypes.DATEONLY,
         allowNull: true
     },
     gender: {
