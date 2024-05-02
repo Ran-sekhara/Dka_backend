@@ -37,8 +37,26 @@ class DoctorServices {
     }
 
     static async generateAccessToken(tokenData, JWT_EXPIRE) {
-        return jwt.sign(tokenData, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRE });
+        try {
+            // Fetch additional user information from the database based on the provided doctor ID
+            const { id } = tokenData;
+            const doctor = await Doctor.findByPk(id);
+
+            if (!doctor) {
+                throw new Error('Doctor not found');
+            }
+
+            // Include additional user information in the token payload
+            const { first_name, last_name, email, role } = doctor;
+            const extendedTokenData = { id, email, role, first_name, last_name };
+
+            // Generate and return the token
+            return jwt.sign(extendedTokenData, process.env.JWT_SECRET, { expiresIn: JWT_EXPIRE });
+        } catch (error) {
+            throw error;
+        }
     }
 }
 
 module.exports = DoctorServices;
+

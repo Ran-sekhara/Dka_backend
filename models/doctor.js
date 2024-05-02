@@ -17,16 +17,16 @@ const Doctor = sequelize.define('doctor', {
     },
     email: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         unique: true
     },
     phone: {
         type: DataTypes.BIGINT,
-        allowNull: false
+        allowNull: true
     },
     password: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     role: {
         type: DataTypes.STRING,
@@ -34,15 +34,29 @@ const Doctor = sequelize.define('doctor', {
     },
     address: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     speciality: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
     },
     image: {
-        type: DataTypes.STRING, 
+        type: DataTypes.BLOB,
         allowNull: true 
+    },
+    is_approved: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false 
+    },
+    archived:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+    },
+    optional: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     },
 }, {
     timestamps: false // Disable timestamps

@@ -1,6 +1,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const Device = require('./device');
 const MedicalFolder = require('./medicalfolder');
+const Test = require('./test');
+
 
 const Patient = sequelize.define('patient', {
     id_patient: {
@@ -33,9 +36,22 @@ const Patient = sequelize.define('patient', {
         type: DataTypes.STRING,
         allowNull: true
     },
+    date_of_birth: {
+        type: DataTypes.DATEONLY,
+        allowNull: false
+    },
+    gender: {
+        type: DataTypes.ENUM('Female', 'Male'),
+        allowNull: false
+    },
     role: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    archived:{
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     },
     id_doctor: {
         type: DataTypes.INTEGER,
@@ -47,4 +63,7 @@ const Patient = sequelize.define('patient', {
 });
 
 Patient.hasOne(MedicalFolder, { foreignKey: 'id_patient'});
+Patient.hasMany(Test,{foreignKey :'id_patient'});
+Patient.hasMany(Device, { foreignKey: 'id_patient' });
+
 module.exports = Patient;
