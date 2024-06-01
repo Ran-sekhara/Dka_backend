@@ -41,10 +41,26 @@ const Doctor = sequelize.define('doctor', {
         allowNull: true
     },
     image: {
-        type: DataTypes.BLOB,
+        type: DataTypes.STRING,
         allowNull: true 
     },
     is_approved: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false 
+    },
+    pdf_path:{
+        type: DataTypes.STRING,
+        allowNull: true 
+    },
+    passwordChanged:{
+        type: DataTypes.BOOLEAN,
+        defaultValue: false 
+    },
+    verificationNumber:{
+        type: DataTypes.STRING,
+        allowNull: true 
+    },
+    isVerified:{
         type: DataTypes.BOOLEAN,
         defaultValue: false 
     },

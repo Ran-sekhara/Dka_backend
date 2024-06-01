@@ -41,8 +41,6 @@ exports.createMedicalFolder = async (req, res) => {
     }
 };
 
-
-
 exports.getMedicalFolderByPatientId = async (req, res) => {
     try {
         const { patientId } = req.params;
@@ -97,24 +95,6 @@ exports.fetchMedicalFolders = async (req, res) => {
     }
 };
 
-exports.deleteMedicalFolder = async (req, res) => {
-  try {
-    const { medicalFolderId } = req.params;
-    console.log('Deleting medical folder:', medicalFolderId); // Check if medicalFolderId is received correctly
-    // Find the medical folder by ID
-    const medicalFolder = await MedicalFolder.findByPk(medicalFolderId);
-    console.log('Medical Folder found:', medicalFolder); // Check if medical folder is found
-    if (!medicalFolder) {
-      return res.status(404).json({ status: false, message: 'MedicalFolder not found' });
-    }
-    await medicalFolder.destroy();
-    console.log('Medical Folder deleted successfully');
-    res.json({ status: true, message: 'MedicalFolder deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting medical folder:', error);
-    res.status(500).json({ status: false, message: 'Internal server error' });
-  }
-};
 
 exports.archivedFolder = async (req, res) => {
     const { medicalFolderId } = req.params;
@@ -212,7 +192,6 @@ exports.unarchiveFolder = async (req, res) => {
       res.status(500).json({ error: 'Failed to unarchive medical folder' });
     }
 };
-
 
 exports.fetchArchivedMedicalFolders = async (req, res) => {
     try {

@@ -1,7 +1,7 @@
 const Location = require('../models/location');
 const Test = require('../models/test');
 const Device = require ('../models/device');
-const { sendPushNotification } = require('../firebase/firebase'); 
+//const { sendPushNotification } = require('../firebase/firebase'); 
 
 // Save mobile location in a global variable or a temporary storage
 let mobileLocation = {};
