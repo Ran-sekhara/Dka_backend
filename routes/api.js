@@ -73,7 +73,6 @@ router.post('/addrecommendation', patientController.addrecommendation);
 router.post('/medicalfolder/:patientId', medicalFolderController.createMedicalFolder);
 router.get('/medicalfolder/patient/:patientId', medicalFolderController.getMedicalFolderByPatientId);
 router.get('/medicalfolders', medicalFolderController.fetchMedicalFolders);
-router.delete('/medicalfolders/:medicalFolderId', medicalFolderController.deleteMedicalFolder);
 router.put('/medicalfolder/:medicalFolderId', medicalFolderController.updateMedicalFolder);
 router.put('/medicalfolders/:medicalFolderId/archive',medicalFolderController.archivedFolder)
 router.get('/medicalfolders/archived', medicalFolderController.fetchArchivedMedicalFolders);
