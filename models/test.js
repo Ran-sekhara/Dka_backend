@@ -2,6 +2,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const moment = require('moment');
+const Location = require('./location');
 
 const Test = sequelize.define('test', {
   id_test: {
@@ -16,15 +17,6 @@ const Test = sequelize.define('test', {
   acetoneqt: {
     type: DataTypes.FLOAT,
     allowNull: false
-  },
-  date: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    get() {
-      // Format the date using moment.js
-      const formattedDate = moment(this.getDataValue('date')).format('YYYY-MM-DD HH:mm');
-      return formattedDate;
-    }
   },
   createdAt: {
     type: DataTypes.DATE, 
@@ -43,8 +35,14 @@ const Test = sequelize.define('test', {
     type: DataTypes.INTEGER,
     allowNull: false
 },
+hide: {
+  type: DataTypes.BOOLEAN,
+  allowNull: false,
+  defaultValue: false 
+}
 }, {
   timestamps: false
 });
+Test.hasOne(Location, { foreignKey: 'id_test' });
 
 module.exports = Test;

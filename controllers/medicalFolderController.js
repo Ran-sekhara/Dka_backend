@@ -1,5 +1,6 @@
 // controllers/medicalFolderController.js
 const { and } = require('sequelize');
+const DkaHistory = require('../models/dkahistory');
 const Doctor = require('../models/doctor');
 const MedicalFolder = require('../models/medicalfolder');
 const Patient = require('../models/patient');
@@ -18,23 +19,21 @@ exports.createMedicalFolder = async (req, res) => {
             return res.status(404).json({ status: false, message: 'Patient not found' });
         }
 
-        // Extract fields from the request body
-        const { diabetes_type, diabetes_history, height, weight } = req.body;
 
-        // Create MedicalFolder
+        const { diabetes_type, diabetes_history, height, weight, is_smoke, area } = req.body;
+
         const medicalFolder = await MedicalFolder.create({
             diabetes_type,
             diabetes_history,
             height,
             weight,
+            is_smoke,
+            area,
             id_patient: patientId,
-            id_doctor: patient.id_doctor // Assign the id_doctor from the patient model
+            id_doctor: patient.id_doctor 
         });
 
-        // Associate the MedicalFolder with the Patient
         await patient.setMedicalfolder(medicalFolder);
-
-        // Send response with 'id_folder' included
         res.json({ status: true, message: 'MedicalFolder created successfully', id_folder: medicalFolder.id_folder });
     } catch (error) {
         console.error('Error creating medical folder:', error);
@@ -48,7 +47,6 @@ exports.getMedicalFolderByPatientId = async (req, res) => {
     try {
         const { patientId } = req.params;
 
-        // Find the MedicalFolder by patient ID
         const medicalFolder = await MedicalFolder.findOne({
             where: { id_patient: patientId },
         });
@@ -57,7 +55,14 @@ exports.getMedicalFolderByPatientId = async (req, res) => {
             return res.status(404).json({ status: false, message: 'MedicalFolder not found for the specified patient' });
         }
 
-        res.json({ status: true, message: 'MedicalFolder information found', information: medicalFolder });
+        res.json({
+            status: true,
+            message: 'MedicalFolder information found',
+            information: {
+                ...medicalFolder.toJSON(),
+                bmi: medicalFolder.bmi // Include BMI in the response
+            }
+        });
     } catch (error) {
         console.error('Error getting MedicalFolder information:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
@@ -67,19 +72,16 @@ exports.getMedicalFolderByPatientId = async (req, res) => {
 
 exports.fetchMedicalFolders = async (req, res) => {
     try {
-        // Find all patients
         const patients = await Patient.findAll();
 
-        // Array to store medical folders for all patients
         const medicalFolders = [];
 
-        // Loop through each patient and find their associated medical folder
         for (const patient of patients) {
             const medicalFolder = await MedicalFolder.findOne({
                 where: { id_patient: patient.id_patient, archived: false },
+                include: [{ model: DkaHistory, order: [['date', 'DESC']], limit: 1 }] // Include the latest DKA history
             });
 
-            // If medical folder exists, push it to the array
             if (medicalFolder) {
                 medicalFolders.push({
                     patientId: patient.id,
@@ -145,7 +147,9 @@ exports.updateMedicalFolder = async (req, res) => {
         // Log the received patientId
         console.log('Received Patient ID:', patientId);
 
-        // Check if the medical folder exists for the patient
+        // Log the received value of is_smoke
+        console.log('Received is_smoke value:', req.body.value);
+
         let medicalFolder = await MedicalFolder.findOne({
             where: { id_patient: patientId },
         });
@@ -165,8 +169,9 @@ exports.updateMedicalFolder = async (req, res) => {
             'diabetes diagnosis date': 'diabetes_history',
             'dka history': 'dka_history',
             'height': 'height',
-            'weight': 'weight'
-            // Add more mappings as needed
+            'weight': 'weight',
+            'smoker': 'is_smoke',
+            'area':'area'
         };
 
         const mappedField = fieldMappings[field.toLowerCase()] || field;

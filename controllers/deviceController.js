@@ -4,6 +4,7 @@ const Patient=require('../models/patient');
 const moment = require('moment');
 const { Op } = require('sequelize');
 const Test = require('../models/test');
+const path = require('path');
 
 exports.createDevice = async (req, res) => {
   try {
@@ -348,4 +349,18 @@ exports.getAllArchivedDevices = async (req, res) => {
   }
 };
 
-
+exports.getUserManual = (req, res) => {
+  const filePath = path.join(__dirname, '../public', 'user_manual.pdf');
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename="user_manual.pdf"');
+  res.sendFile(filePath, (err) => {
+    if (err) {
+      console.error('Error sending file:', err);
+      if (err.code === 'ENOENT') {
+        res.status(404).send('File not found');
+      } else {
+        res.status(500).send('Error sending file');
+      }
+    }
+  });
+};

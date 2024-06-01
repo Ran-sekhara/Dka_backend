@@ -42,23 +42,35 @@ exports.loginPatient = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
-         // Retrieve Patient by email
-         const patient = await Patient.findOne({ where: { email } });
-         if (!patient) {
-             return res.status(401).json({ status: false, message: 'Incorrect email or password' });
-         }
- 
-         // Compare passwords
-         const isPasswordCorrect = await bcrypt.compare(password, patient.password);
-         if (!isPasswordCorrect) {
-             return res.status(401).json({ status: false, message: 'Incorrect email or password' });
-         }
+        // Retrieve Patient by email
+        const patient = await Patient.findOne({ where: { email } });
+        if (!patient) {
+            return res.status(404).json({ status: false, message: 'Patient does not exist' });
+        }
+
+        // Compare passwords
+        const isPasswordCorrect = await bcrypt.compare(password, patient.password);
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ status: false, message: 'Incorrect password' });
+        }
 
         const oneDayInSeconds = 24 * 60 * 60; // 1 day = 24 hours * 60 minutes * 60 seconds
         const expiresIn = 365 * oneDayInSeconds;
         let tokenData;
         tokenData = { id: patient.id_patient, email: patient.email, role: "patient" };
         const token = await PatientServices.generateAccessToken(tokenData, expiresIn);
+        const userData = {
+            age: patient.age,
+            gender: patient.gender,
+            diabetes_type: patient.diabetes_type,
+            Smokes: patient.Smokes
+        };
+        // Call Python recommendation script with userData
+        const pythonProcess = spawn('python', ['C:/System-Reco/dka.py']);
+
+        // Send user data to Python script
+        pythonProcess.stdin.write(JSON.stringify(userData));
+        pythonProcess.stdin.end();
 
         res.status(200).json({ status: true, message: 'Successfully logged in', token: token });
     } catch (error) {
@@ -252,7 +264,6 @@ exports.updatePatientDoctor = async (req, res) => {
             address: patient.address,
             gender:patient.gender,
             date_of_birth:patient.date_of_birth
-            // Add other fields as needed
         });
     } catch (error) {
         console.error('Error fetching patient details:', error);
@@ -266,50 +277,43 @@ exports.updatePatientProfile = async (req, res) => {
         let { field, value } = req.body;
 
         console.log('Received update request for patient ID:', patientId);
-        console.log('Request Body:', req.body); // Log the entire request body
+        console.log('Request Body:', req.body);
 
-        // Ensure both field and value are present in the request body
         if (!field || !value) {
-            console.log('Field or value is missing'); 
+            console.log('Field or value is missing');
             return res.status(400).json({ message: 'Field or value is missing' });
         }
 
-        // Handle special cases where the field corresponds to a combined name
+        // Find the patient by ID
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) {
+            console.log('Patient not found');
+            return res.status(404).json({ message: 'Patient not found' });
+        }
+
         if (field.toLowerCase() === 'name') {
             const [firstName, lastName] = value.split(' ');
-            // Update both first name and last name fields in the database
-            const patient = await Patient.findByPk(patientId);
-            if (!patient) {
-                console.log('Patient not found');
-                return res.status(404).json({ message: 'Patient not found' });
+            if (!firstName || !lastName) {
+                console.log('Invalid name format');
+                return res.status(400).json({ message: 'Invalid name format' });
             }
             patient['first_name'] = firstName;
             patient['last_name'] = lastName;
-            await patient.save();
         } else {
-            // Map the field name if needed
             const fieldMappings = {
                 'phone number': 'phone',
-                'date of birth':'date_of_birth',
-                
+                'date of birth': 'date_of_birth',
             };
             field = fieldMappings[field.toLowerCase()] || field; // Use the mapped field name if available
 
             // Convert the field name to lowercase
             const lowercaseField = field.toLowerCase();
 
-            // Find the patient by ID
-            const patient = await Patient.findByPk(patientId);
-            if (!patient) {
-                console.log('Patient not found');
-                return res.status(404).json({ message: 'Patient not found' });
-            }
-
             // Update patient profile with received data
             patient[lowercaseField] = value;
-            await patient.save();
         }
 
+        await patient.save();
         console.log('Patient profile updated successfully');
         return res.status(200).json({ status: true, message: 'Patient profile updated successfully' });
     } catch (error) {
@@ -317,42 +321,32 @@ exports.updatePatientProfile = async (req, res) => {
         return res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
-//exports.updatePatientProfile = async (req, res) => {
-  //  try {
-       // const patientId = req.params.patientId;
-       // const { updatedData } = req.body; // Assuming updatedData is an object containing the fields to update
 
-       // console.log('Received data from front end:', updatedData); // Add a print statement to see the data received from the front end
-
-       // if (!updatedData) {
-       //     return res.status(400).json({ status: false, message: 'Updated data is required' });
-       // }
-
-        // Print the labels received from the frontend
-       // console.log('Labels received from front end:', Object.keys(updatedData));
-
-        // Find the patient by ID
-       // const patient = await Patient.findByPk(patientId);
+exports.modifyPassword = async (req, res) => {
+    try {
+      const { patientId } = req.params;
+      const { currentPassword, newPassword } = req.body;
   
-       // if (!patient) {
-          //  return res.status(404).json({ message: 'Patient not found' });
-       // }
-
-        // Update patient profile with received data
-       // Object.keys(updatedData).forEach(key => {
-       //     if (patient.hasOwnProperty(key)) {
-        //        patient[key] = updatedData[key];
-         //   }
-       // });
-
-      //  await patient.save();
-       // console.log('Patient profile updated successfully'); // Add a print statement to indicate successful update
-       // return res.status(200).json({ status: true, message: 'Patient profile updated successfully' });
-   // } catch (error) {
-      //  console.error('Error updating patient profile:', error);
-      //  return res.status(500).json({ status: false, message: 'Internal server error' });
-   // }
-//};
+      const patient = await Patient.findByPk(patientId);
+      if (!patient) {
+        return res.status(404).json({ status: false, message: 'Patient not found' });
+      }
+  
+      const isPasswordCorrect = await bcrypt.compare(currentPassword, patient.password);
+      if (!isPasswordCorrect) {
+        return res.status(401).json({ status: false, message: 'Incorrect current password' });
+      }
+  
+      const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+  
+      await Patient.update({ password: hashedNewPassword }, { where: { id_patient: patientId } });
+  
+      return res.status(200).json({ status: true, message: 'Password updated successfully' });
+    } catch (error) {
+      console.error('Error modifying password:', error);
+      return res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+  };
 
 exports.deletePatient = async (req, res) => {
     try {
@@ -532,3 +526,116 @@ exports.archivedPatient = async (req, res) => {
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
 };
+
+exports.updateFCMToken = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const { fcmToken } = req.body;
+
+        console.log('Received patientId:', patientId);
+        console.log('Received fcmToken:', fcmToken);
+
+        // Find the patient by ID
+        const patient = await Patient.findByPk(patientId);
+        console.log('Found patient:', patient);
+
+        if (!patient) {
+            console.log('Patient not found');
+            return res.status(404).json({ status: false, message: 'Patient not found' });
+        }
+
+        console.log('Patient before update:', patient);
+        patient.fcm_token = fcmToken;
+        console.log('Patient after update:', patient);
+        
+
+        await patient.save();
+        console.log('Patient saved with updated FCM token');
+
+        return res.status(200).json({ status: true, message: 'FCM token updated successfully' });
+    } catch (error) {
+        console.error('Error updating FCM token:', error);
+        return res.status(500).json({ status: false, message: 'Internal server error' });
+    }
+};
+
+exports.getPatientsInDanger = async (req, res) => {
+    const { doctorId } = req.params;
+    try {
+      const currentDate = new Date().toISOString().slice(0, 10); // Get current date in 'YYYY-MM-DD' format
+  
+      const patients = await Patient.findAll({
+        where: {
+          id_doctor: doctorId
+        },
+        include: [{
+          model: Test,
+          where: {
+            state: 'danger',
+            date: {
+              [Op.gte]: new Date(currentDate), // Filter tests by current date or later
+              [Op.lt]: new Date(currentDate + 'T23:59:59.999Z') // Filter tests before the next day
+            }
+          },
+          attributes: ['date', 'acetoneqt'], // Select only 'date' and 'acetoneqt' from tests
+          required: true // Inner join, will only return patients with matching tests
+        }],
+        attributes: ['id_patient', 'first_name', 'last_name', 'email'], // Select specific attributes from patients
+      });
+  
+      // Extract relevant patient information
+      const formattedPatients = patients.map(patient => ({
+        id: patient.id_patient,
+        firstName: patient.first_name,
+        lastName: patient.last_name,
+        email: patient.email,
+        dateOfTest: patient.tests.length > 0 ? patient.tests[0].date : null, 
+        acetoneQt: patient.tests.length > 0 ? patient.tests[0].acetoneqt : null 
+      }));
+  
+      res.json(formattedPatients);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  };
+  exports.addrecommendation = async (req, res) => { 
+    const { typerecommendation, rating, recommendation, age,diabetesType,gender,area,isSmoke, } = req.body;
+
+     // Log gender to the terminal
+     console.log(`smoek: ${isSmoke}`);
+    const pythonProcess = spawn('python', ['C:\\Users\\GE\\Desktop\\backback\\python\\rec.py',typerecommendation,
+        rating,
+        recommendation,
+        age,
+        gender,
+        diabetesType,
+        isSmoke,
+        area]);
+    
+    let pythonOutput = '';
+    
+    // Capture stdout data from Python script
+    pythonProcess.stdout.on('data', (data) => {
+        console.log(`stdout: ${data}`);
+        pythonOutput += data.toString(); // Append stdout data to the output variable
+    });
+    
+    pythonProcess.stderr.on('data', (data) => {
+        console.error(`stderr: ${data}`);
+    });
+    
+    // Handle any errors from Python script execution
+    pythonProcess.on('error', (error) => {
+        console.error(`Error executing Python script: ${error.message}`);
+    });
+    
+    // When the Python script execution is complete
+    pythonProcess.on('close', (code) => {
+        console.log(`Python script process exited with code ${code}`);
+        res.status(200).json({
+            message: 'Successfully added',
+            pythonOutput: pythonOutput.trim()
+        });
+    });
+}

@@ -57,36 +57,38 @@ exports.createTest = async (req, res) => {
 };
 
 exports.getTests = async (req, res) => {
-    const patientId = req.params.patientId;
-  
-    try {
-      const tests = await Test.findAll({
-        where: {
-          id_patient: patientId
-        }
-      });
-      res.json(tests);
-    } catch (error) {
-      console.error('Error fetching tests:', error);
-      res.status(500).json({ error: 'Internal server error' });
-    }
-  };
+  const patientId = req.params.patientId;
 
-  exports.deleteTest = async (req, res) => {
-    try {
-      const testId = req.params.testId;
-  
-      const test = await Test.findByPk(testId);
-  
-      if (!test) {
-        return res.status(404).json({ error: 'Test not found' });
-      }
-  
-      await test.destroy();
-  
-      res.json({ message: 'Test deleted successfully' });
-    } catch (error) {
-      console.error('Error deleting test:', error);
-      res.status(500).json({ error: 'Internal server error' });
+  try {
+    const tests = await Test.findAll({
+      where: {
+        id_patient: patientId,
+        hide: false 
+      },
+      order: [['createdAt', 'DESC']] 
+    });
+    res.json(tests);
+  } catch (error) {
+    console.error('Error fetching tests:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+exports.deleteTest = async (req, res) => {
+  try {
+    const testId = req.params.testId;
+
+    const test = await Test.findByPk(testId);
+
+    if (!test) {
+      return res.status(404).json({ error: 'Test not found' });
     }
-  };
+
+    await test.update({ hide: true });
+
+    res.json({ message: 'Test hidden successfully' });
+  } catch (error) {
+    console.error('Error hiding test:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

@@ -8,10 +8,11 @@ const graphController = require('../controllers/graphController')
 const medicalFolderController = require('../controllers/medicalFolderController')
 const deviceController = require('../controllers/deviceController')
 const testController=require('../controllers/testController')
+const testLocationController = require('../controllers/testLocationController')
 const quizController = require('../controllers/quizController');
 const dkaHistoryController = require('../controllers/dkahistoryController');
+const locationController=require ('../controllers/locationController');
 const authMiddleware = require('../middleware/auth');
-
 
 const router = express.Router();
 
@@ -29,26 +30,22 @@ router.get('/admin',adminController.getAdminDetails);
 
 //doctor
 router.post('/doctor', doctorController.createDoctor);
-router.post('/optionalDoctor', doctorController.createOptionalDoctor);
 router.post('/doctor/loginDoctor', doctorController.loginDoctor);
-router.post('/doctor/recoverpsswrd', doctorController.recoverPassword);
+router.post('/doctor/recoverPassword', doctorController.recoverPassword);
+router.post('/doctor/verifyVerificationNumber', doctorController.verifyVerificationNumber);
 router.post('/doctor/checkEmailExistence', doctorController.checkEmailExistence);
 router.get('/doctors', doctorController.getAllDoctors);
 router.get('/doctors/:doctorId/patients', doctorController.getDoctorPatientsInfo);
 router.get('/doctorsName', doctorController.getAllDoctorsByName);
-router.delete('/doctors/:doctorId', doctorController.deleteDoctor);
-router.put('/doctors/:doctorId', doctorController.updateDoctor);
+router.get('/doctor/profile/:doctorId', doctorController.doctorprofile);
+router.put('/doctors/profile/:doctorId', doctorController.updateProfile);
+router.get('/doctors/:doctorId/patients/count', doctorController.getDoctorPatientsCount);
+router.post('/doctor/updatePassword', doctorController.updatePassword);
+router.put('/doctor/updatePasswordWithConfirmation', doctorController.updatePasswordWithConfirmation);
+router.post('/optionalDoctor', doctorController.createOptionalDoctor);
 router.get('/doctors/archived', doctorController.getArchivedDoctors);
 router.put('/doctors/:doctorId/archive',doctorController.archivedDoctor);
 router.put('/doctors/:doctorId/unarchive',doctorController.unarchiveDoctor);
-router.get('/doctor/image/:id', doctorController.getImage);
-router.post('/doctor/image/upload/:id', upload.single('image'), doctorController.uploadImage);
-
-// // Route for uploading doctor image
-// router.post('/:id/upload-image', doctorController.uploadImage);
-
-// // Route for retrieving doctor image
-// router.get('/:id/image', doctorController.getImage);
 
 //patient
 router.post('/patient', patientController.createPatient);
@@ -67,7 +64,10 @@ router.get('/patients/archived', patientController.getAllArchivedPatients);
 router.put('/patients/:patientId/unarchive',patientController.unarchivePatient)
 router.get('/patients/:patientId/email', patientController.fetchPatientEmail);
 router.post('/patients/sendemail', patientController.sendEmail);
-
+router.put('/patients/:patientId/password', patientController.modifyPassword);
+router.post('/patients/:patientId/fcmtoken', patientController.updateFCMToken);
+router.get('/patients/danger/:doctorId', patientController.getPatientsInDanger);
+router.post('/addrecommendation', patientController.addrecommendation);
 
 //medicalfolder
 router.post('/medicalfolder/:patientId', medicalFolderController.createMedicalFolder);
@@ -84,7 +84,6 @@ router.put('/medicalfolder/:patientId/updateMedicalFolder', medicalFolderControl
 
 
 //graph
-router.post('/graph/test', graphController.createTest);
 router.get('/graph/good', graphController.getGraphData);
 router.get('/graph/good', graphController.getGraphData);
 router.get('/graph/danger', graphController.Danger);
@@ -101,18 +100,23 @@ router.put('/devices/:deviceId/archive',deviceController.archivedDevice)
 router.put('/devices/:deviceId/unarchive',deviceController.unarchiveDevice)
 router.get('/Archiveddevices', deviceController.getAllArchivedDevices);
 router.get('/deviceStates', deviceController.getAllDeviceStates);
+router.get('/user_manual.pdf', deviceController.getUserManual);
 
 
 //test
-router.post('/test', testController.createTest);
 router.get('/tests/:patientId', testController.getTests);
 router.delete('/deleteTest/:testId', testController.deleteTest);
 
 //dkahitory
 router.post('/createDkaHistory', dkaHistoryController.createDkaHistory);
 router.get('/dkaHistory/:medicalFolderId', dkaHistoryController.getDkaHistory);
-router.delete('/deleteDH/:dkaHistoryId', dkaHistoryController.deleteDkaHistory);
 
+
+// Define routes for handling location data
+router.post('/data', testLocationController.createTestAndLocation);
+router.get('/latestTestResult', testLocationController.getLatestTestResult);
+router.post('/location', testLocationController.receiveMobileLocation);
+router.get('/LatestLocation', authMiddleware, locationController.getLatestLocation);
 
 
 

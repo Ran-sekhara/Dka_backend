@@ -11,7 +11,7 @@ exports.getGraphData = async (req, res) => {
           [sequelize.fn('count', sequelize.literal('DISTINCT id_test')), 'patientCount']
         ],
         where: {
-          state: 'good',
+          state: 'Good',
           date: {
             [Op.not]: null
           }
@@ -41,7 +41,7 @@ exports.Danger= async (req, res) => {
         [sequelize.fn('count', sequelize.literal('DISTINCT id_test')), 'patientCount']
       ],
       where: {
-        state: 'danger',
+        state: 'Dangerous',
         date: {
           [Op.not]: null
         }
@@ -72,7 +72,7 @@ exports.Nrml= async (req, res) => {
         [sequelize.fn('count', sequelize.literal('DISTINCT id_test')), 'patientCount']
       ],
       where: {
-        state: 'nrml',
+        state: 'Moderate',
         date: {
           [Op.not]: null
         }
@@ -87,29 +87,6 @@ exports.Nrml= async (req, res) => {
     }));
 
     res.json(formattedData);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-};
-//create test
-exports.createTest = async (req, res) => {
-  try {
-    const { state, acetoneqt, date } = req.body;
-
-    // Validate input (customize based on your requirements)
-    if (!state || !acetoneqt || !date) {
-      return res.status(400).json({ error: 'Incomplete data. Please provide state, acetoneqt, and date.' });
-    }
-
-    // Create a new test record
-    const newTest = await Test.create({
-      state,
-      acetoneqt,
-      date,
-    });
-
-    res.status(201).json(newTest);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });

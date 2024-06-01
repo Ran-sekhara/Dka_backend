@@ -57,6 +57,10 @@ const Patient = sequelize.define('patient', {
         type: DataTypes.INTEGER,
         allowNull: true
     },
+    fcm_token: {
+        type: DataTypes.STRING, 
+        allowNull: true, 
+    },
  
 }, {
     timestamps: false // Disable timestamps
@@ -64,6 +68,6 @@ const Patient = sequelize.define('patient', {
 
 Patient.hasOne(MedicalFolder, { foreignKey: 'id_patient'});
 Patient.hasMany(Test,{foreignKey :'id_patient'});
-Patient.hasMany(Device, { foreignKey: 'id_patient' });
+Patient.hasOne(Device, { foreignKey: 'id_patient' });
 
 module.exports = Patient;

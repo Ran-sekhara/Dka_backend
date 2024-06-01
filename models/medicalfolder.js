@@ -3,8 +3,6 @@ const sequelize = require('../config/database');
 const DkaHistory = require('./dkahistory');
 const moment = require('moment');
 
-
-
 const MedicalFolder = sequelize.define('medicalfolder', {
     id_folder: {
         type: DataTypes.INTEGER,
@@ -12,22 +10,28 @@ const MedicalFolder = sequelize.define('medicalfolder', {
         autoIncrement: true
     },
     diabetes_type: {
-        type: DataTypes.ENUM('Type 1', 'Type 2'), // Define the options as ENUM
+        type: DataTypes.ENUM('Type 1', 'Type 2'),
         allowNull: true
     },
     diabetes_history: {
         type: DataTypes.DATEONLY,
         allowNull: true,
-       },
+    },
     height: {
         type: DataTypes.STRING,
         allowNull: true,
-       
     },
     weight: {
         type: DataTypes.STRING,
         allowNull: true,
-        
+    },
+    is_smoke: {
+        type: DataTypes.ENUM('Yes','No'),
+        allowNull: true,
+    },
+    area: {
+        type: DataTypes.ENUM('Northeast','Northwest','Southeast','Southwest','Center'),
+        allowNull: true,
     },
     archived:{
         type: DataTypes.BOOLEAN,
@@ -37,10 +41,22 @@ const MedicalFolder = sequelize.define('medicalfolder', {
     id_patient: {
         type: DataTypes.INTEGER,
         allowNull: true
-    },
+    }
 }, {
-    timestamps: false // Disable timestamps
+    timestamps: false,
+    getterMethods: {
+        bmi() {
+            if (this.height && this.weight) {
+                const heightInMeters = parseFloat(this.height) / 100;
+                const weightInKg = parseFloat(this.weight);
+                return (weightInKg / (heightInMeters * heightInMeters)).toFixed(2);
+            }
+            return null;
+        }
+    }
 });
+
 MedicalFolder.hasMany(DkaHistory, { foreignKey: 'id_folder' });
 DkaHistory.belongsTo(MedicalFolder, { foreignKey: 'id_folder' });
+
 module.exports = MedicalFolder;
