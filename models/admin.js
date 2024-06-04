@@ -32,6 +32,10 @@ const Admin = sequelize.define('admin', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    adjective: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
 }, {
     timestamps: false // Disable timestamps
 });

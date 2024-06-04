@@ -4,6 +4,9 @@ const bcrypt = require('bcrypt');
 const PatientServices = require('../services/patient.service');
 const { generateNewPassword } = require('../utils/passwordUtils.js');
 const nodemailer = require('nodemailer');
+const { spawn } = require('child_process');
+const MedicalFolder = require('../models/medicalfolder');
+const moment = require('moment');
 
 // Create a Patient
 exports.createPatient = async (req, res) => {
@@ -41,39 +44,76 @@ exports.createPatient = async (req, res) => {
 exports.loginPatient = async (req, res, next) => {
     try {
         const { email, password } = req.body;
+        
 
         // Retrieve Patient by email
-        const patient = await Patient.findOne({ where: { email } });
+        const patient = await Patient.findOne({ 
+            where: { email },
+            include: MedicalFolder // Include MedicalFolder model to retrieve associated data
+        });
+
         if (!patient) {
-            return res.status(404).json({ status: false, message: 'Patient does not exist' });
+            return res.status(401).json({ status: false, message: 'Incorrect email or password' });
         }
 
         // Compare passwords
         const isPasswordCorrect = await bcrypt.compare(password, patient.password);
         if (!isPasswordCorrect) {
-            return res.status(401).json({ status: false, message: 'Incorrect password' });
+            return res.status(401).json({ status: false, message: 'Incorrect email or password' });
         }
 
+        // Calculate age based on date_of_birth
+        const birthDate = moment(patient.date_of_birth);
+        const age = moment().diff(birthDate, 'years');
+
+        const gender = patient.gender;
+
+        // Extract gender and diabetes_type from associated MedicalFolder
+        const medicalFolder = await MedicalFolder.findOne({ where: { id_patient: patient.id_patient } });
+        const diabetesType = medicalFolder ? medicalFolder.diabetes_type : null;
+        const is_smoke = medicalFolder ? medicalFolder.is_smoke : null;
+        const area =medicalFolder ? medicalFolder.area : null;
+
+        // Generate token
         const oneDayInSeconds = 24 * 60 * 60; // 1 day = 24 hours * 60 minutes * 60 seconds
         const expiresIn = 365 * oneDayInSeconds;
-        let tokenData;
-        tokenData = { id: patient.id_patient, email: patient.email, role: "patient" };
+        const tokenData = { id: patient.id_patient, email: patient.email, role: "patient" };
         const token = await PatientServices.generateAccessToken(tokenData, expiresIn);
-        const userData = {
-            age: patient.age,
-            gender: patient.gender,
-            diabetes_type: patient.diabetes_type,
-            Smokes: patient.Smokes
+        // Construct response object with age, gender, and diabetes type
+        const responseData = {
+            age,
+            gender,
+            diabetesType,
+            is_smoke,
+            area
         };
-        // Call Python recommendation script with userData
-        const pythonProcess = spawn('python', ['C:/System-Reco/dka.py']);
 
-        // Send user data to Python script
-        pythonProcess.stdin.write(JSON.stringify(userData));
-        pythonProcess.stdin.end();
-
-        res.status(200).json({ status: true, message: 'Successfully logged in', token: token });
-    } catch (error) {
+        const pythonProcess = spawn('python',['C:\\Users\\DELL\\express\\Dka_backend\\python\\dka.py', age, gender, diabetesType,is_smoke, area]);
+        let pythonOutput = '';
+  // Capture stdout data from Python script
+  pythonProcess.stdout.on('data', (data) => {
+    console.log(`stdout: ${data}`);
+    pythonOutput += data.toString(); // Append stdout data to the output variable
+});
+pythonProcess.stderr.on('data', (data) => {
+    console.error(`stderr: ${data}`);
+});
+ // Handle any errors from Python script execution
+ pythonProcess.on('error', (error) => {
+    console.error(`Error executing Python script: ${error.message}`);
+});
+         // When the Python script execution is complete
+         pythonProcess.on('close', (code) => {
+            console.log(`Python script process exited with code ${code}`);
+            res.status(200).json({
+                status: true,
+                message: 'Successfully logged in',
+                data: { age, gender, diabetesType , is_smoke,area},
+                token: token ,
+                pythonOutput: pythonOutput
+            });
+        });
+    }catch (error) {
         console.error('Error logging in patient:', error);
         res.status(500).json({ status: false, message: 'Internal server error' });
     }
@@ -347,6 +387,7 @@ exports.modifyPassword = async (req, res) => {
       return res.status(500).json({ status: false, message: 'Internal server error' });
     }
   };
+  
 
 exports.deletePatient = async (req, res) => {
     try {
@@ -604,7 +645,7 @@ exports.getPatientsInDanger = async (req, res) => {
 
      // Log gender to the terminal
      console.log(`smoek: ${isSmoke}`);
-    const pythonProcess = spawn('python', ['C:\\Users\\GE\\Desktop\\backback\\python\\rec.py',typerecommendation,
+    const pythonProcess = spawn('python', ['C:\\Users\\DELL\\express\\Dka_backend\\python\\rec.py',typerecommendation,
         rating,
         recommendation,
         age,

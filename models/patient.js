@@ -25,9 +25,14 @@ const Patient = sequelize.define('patient', {
         unique: true
     },
     phone: {
-        type: DataTypes.BIGINT,
-        allowNull: false
-    },
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          isNumeric: {
+            msg: 'Phone number must contain only numbers'
+          }
+        }
+      },
     password: {
         type: DataTypes.STRING,
         allowNull: false

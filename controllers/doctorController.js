@@ -182,16 +182,19 @@ exports.checkEmailExistence = async (req, res) => {
   exports.getAllDoctors = async (req, res) => {
     try {
       const doctors = await Doctor.findAll({
-        attributes: ['id_doctor', 'first_name', 'last_name', 'email', 'speciality','image'],
+        attributes: ['id_doctor', 'first_name', 'last_name', 'email', 'speciality', 'phone', 'address', 'is_approved', 'pdf_path'],
       });
+      const doctorsData = doctors.map(doctor => doctor.dataValues);
+      const totalDoctors = doctorsData.length;
   
-      res.status(200).json({ status: true, doctors });
+      console.log(doctorsData);
+  
+      res.status(200).json({ status: true, totalDoctors, doctors: doctorsData });
     } catch (error) {
       console.error('Error fetching doctors:', error);
       res.status(500).json({ status: false, message: 'Internal server error' });
     }
   };
-
 //get patients list associated to the doctor
 exports.getDoctorPatientsInfo = async (req, res) => {
   try {

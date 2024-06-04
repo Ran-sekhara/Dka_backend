@@ -9,7 +9,7 @@ const AdminServices = require('../services/admin.service');
 // Create an admin
 exports.createAdmin = async (req, res) => {
     try {
-        const { first_name, last_name, email, phone, password, role } = req.body;
+        const { first_name, last_name, email, phone, password, role, adjective } = req.body;
         
         // Check if admin with the same email already exists
         const existingAdmin = await Admin.findOne({ where: { email } });
@@ -22,7 +22,7 @@ exports.createAdmin = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, salt);
 
         // Create new admin with hashed password
-        const admin = await Admin.create({ first_name, last_name, email, phone, password: hashedPassword, role });
+        const admin = await Admin.create({ first_name, last_name, email, phone, password: hashedPassword, role, adjective });
         res.json({ status: true, message: 'Admin registered successfully', id: admin.id });
     } catch (error) {
         console.error('Error creating admin:', error);
@@ -75,7 +75,8 @@ exports.loginAdmin = async (req, res, next) => {
              email: admin.email, 
              role: "admin", 
             first_name: admin.first_name,
-            last_name: admin.last_name,}; 
+            last_name: admin.last_name,
+            adjective: admin.adjective}; 
         const token = await AdminServices.generateAccessToken(tokenData, expiresIn);
     
         res.status(200).json({ status: true, message: 'Successfully logged in', token: token, role: "admin" });

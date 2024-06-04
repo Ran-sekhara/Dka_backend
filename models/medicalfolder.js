@@ -18,11 +18,11 @@ const MedicalFolder = sequelize.define('medicalfolder', {
         allowNull: true,
     },
     height: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: true,
     },
     weight: {
-        type: DataTypes.STRING,
+        type: DataTypes.FLOAT,
         allowNull: true,
     },
     is_smoke: {

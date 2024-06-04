@@ -68,7 +68,6 @@ router.put('/patients/:patientId/password', patientController.modifyPassword);
 router.post('/patients/:patientId/fcmtoken', patientController.updateFCMToken);
 router.get('/patients/danger/:doctorId', patientController.getPatientsInDanger);
 router.post('/addrecommendation', patientController.addrecommendation);
-
 //medicalfolder
 router.post('/medicalfolder/:patientId', medicalFolderController.createMedicalFolder);
 router.get('/medicalfolder/patient/:patientId', medicalFolderController.getMedicalFolderByPatientId);

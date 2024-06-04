@@ -5,6 +5,7 @@ const moment = require('moment');
 const { Op } = require('sequelize');
 const Test = require('../models/test');
 const path = require('path');
+const cron = require('node-cron');
 
 exports.createDevice = async (req, res) => {
   try {
@@ -181,8 +182,8 @@ exports.updateDeviceStates = async () => {
   }
 };
 
-// Schedule device state update task to run every 24 hours
-setInterval(async () => {
+// Schedule device state update task to run every day at 00:00
+cron.schedule('0 0 * * *', async () => {
   try {
     console.log('Running device state update task...');
     await exports.updateDeviceStates();
@@ -190,7 +191,9 @@ setInterval(async () => {
   } catch (error) {
     console.error('Error running device state update task:', error);
   }
-}, 24 * 60 * 60 * 1000);
+});
+
+console.log('Device state update task scheduled to run every day at 00:00');
 
 exports.updateDevice = async (req, res) => {
   try {
